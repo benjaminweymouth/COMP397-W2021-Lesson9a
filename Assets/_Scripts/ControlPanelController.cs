@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+ 
 using UnityEngine;
 using UnityEngine.UI;
+ 
 
 public class ControlPanelController : MonoBehaviour
 {
@@ -10,19 +12,29 @@ public class ControlPanelController : MonoBehaviour
     public Vector2 offScreenPosition;
     public Vector2 onScreenPosition;
 
-    [Range(0.1f, 10.0f)] 
+
+    [Range(0.1f, 10.0f)]
     public float speed = 1.0f;
     public float timer = 0.0f;
     public bool isOnScreen = false;
+
+    [Header("Player Settings")]
+    public PlayerBehaviour player;
 
     public CameraController playerCamera;
 
     public Pauseable pausable;
 
+    [Header("Scene Data")]
+    public SceneDataSO sceneData;
+    //adding label
+    public GameObject gameStateElement;
+
     // Start is called before the first frame update
     void Start()
     {
         pausable = FindObjectOfType<Pauseable>();
+        player = FindObjectOfType<PlayerBehaviour>();
         playerCamera = FindObjectOfType<CameraController>();
         rectTransform = GetComponent<RectTransform>();
         rectTransform.anchoredPosition = offScreenPosition;
@@ -40,11 +52,21 @@ public class ControlPanelController : MonoBehaviour
         if (isOnScreen)
         {
             MoveControlPanelDown();
+            gameStateElement.SetActive(pausable.isGamePaused);
         }
         else
         {
             MoveControlPanelUp();
+             
         }
+
+        gameStateElement.SetActive(pausable.isGamePaused);
+        //gameStateLabel.enabled = pausable.isGamePaused;
+
+        //if (pausable.isGamePaused)
+        //{
+
+        //} 
     }
 
     void ToggleControlPanel()
@@ -91,5 +113,26 @@ public class ControlPanelController : MonoBehaviour
     public void OnControlButtonPressed()
     {
         ToggleControlPanel();
+    }
+
+    public void OnLoadButtonPressed()
+    {
+        player.controller.enabled = false;
+        player.transform.position = sceneData.playerPosition;
+        player.transform.rotation = sceneData.playerRotation;
+        player.controller.enabled = true;
+
+        player.health = sceneData.playerHealth;
+        player.healthBar.SetHealth(sceneData.playerHealth);
+
+    }
+
+    public void OnSaveButtonPressed()
+    {
+       //gives unity.engine transform : TYPE MISMATCH
+       
+        sceneData.playerPosition = player.transform.position;
+        sceneData.playerRotation = player.transform.rotation;
+        sceneData.playerHealth = player.health;
     }
 }
